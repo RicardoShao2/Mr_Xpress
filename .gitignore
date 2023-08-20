@@ -7,6 +7,6 @@
 /dataSources/
 /dataSources.local.xml
 
+application.yml
 
-/*.iml
-/*.xml
+/.idea
