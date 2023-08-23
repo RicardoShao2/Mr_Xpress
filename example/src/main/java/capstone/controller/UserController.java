@@ -15,7 +15,6 @@ import javax.servlet.http.HttpServletRequest;
 @RequestMapping("/user")
 public class UserController {
 
-
     @Autowired
     private UserService userService;
 
@@ -37,7 +36,11 @@ public class UserController {
     * */
     @PostMapping("/sign_up_1")
     public R<String> sign_up_1(@RequestBody Users user){
-        return null;
+        int res = userService.sign_up_1(user);
+        if(res==1)
+            return R.error("Email exists");
+        else
+            return R.success("Successfully send verify email, please check");
     }
 
 
@@ -48,7 +51,8 @@ public class UserController {
     * */
     @PostMapping("/sign_up_2")
     public R<String> sign_up_2(@RequestBody Users user){
-        return null;
+        userService.sign_up_2(user);
+        return R.success("sign un success");
     }
 
 
