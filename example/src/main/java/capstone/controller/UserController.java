@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 
 @Slf4j
@@ -35,12 +36,15 @@ public class UserController {
     *
     * */
     @PostMapping("/sign_up_1")
-    public R<String> sign_up_1(@RequestBody Users user){
-        int res = userService.sign_up_1(user);
-        if(res==1)
+    public R<String> sign_up_1(@RequestBody Users user,HttpServletRequest request){
+        String veriCode= userService.sign_up_1(user);
+        if(veriCode == null)
             return R.error("Email exists");
-        else
+        else {
+            HttpSession session = request.getSession();
+            session.setAttribute("verifyCode",veriCode);
             return R.success("Successfully send verify email, please check");
+        }
     }
 
 
@@ -49,10 +53,16 @@ public class UserController {
     * 注册方法下半段
     *
     * */
-    @PostMapping("/sign_up_2")
-    public R<String> sign_up_2(@RequestBody Users user){
-        userService.sign_up_2(user);
-        return R.success("sign un success");
+    @PostMapping("/sign_up_2/{veriCode}")
+    public R<String> sign_up_2(@RequestBody Users user,@PathVariable String veriCode,HttpServletRequest request){
+        if(veriCode.equals(request.getSession().getAttribute("verifyCode"))) {
+            userService.sign_up_2(user, veriCode);
+            return R.success("sign up success");
+        }
+        else
+            return R.error("sign up failed");
+
+
     }
 
 
