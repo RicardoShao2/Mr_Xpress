@@ -3,6 +3,7 @@ package capstone.controller;
 import capstone.common.R;
 import capstone.entity.Users;
 import capstone.service.UserService;
+import capstone.utils.GenerateTool;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -18,6 +19,8 @@ public class UserController {
 
     @Autowired
     private UserService userService;
+
+
 
     /*
     *
@@ -43,6 +46,7 @@ public class UserController {
         else {
             HttpSession session = request.getSession();
             session.setAttribute("verifyCode",veriCode);
+            session.setAttribute("codeCreateTime",System.currentTimeMillis());
             return R.success("Successfully send verify email, please check");
         }
     }
@@ -55,7 +59,8 @@ public class UserController {
     * */
     @PostMapping("/sign_up_2/{veriCode}")
     public R<String> sign_up_2(@RequestBody Users user,@PathVariable String veriCode,HttpServletRequest request){
-        if(veriCode.equals(request.getSession().getAttribute("verifyCode"))) {
+        long creationTime = (Long) request.getSession().getAttribute("codeCreationTime");
+        if(veriCode.equals(request.getSession().getAttribute("verifyCode")) && System.currentTimeMillis()- creationTime<GenerateTool.CODEVALIDTIME ) {
             userService.sign_up_2(user, veriCode);
             return R.success("sign up success");
         }

@@ -36,7 +36,6 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, Users> implements U
         //如果邮箱不存在于数据库中，返回0，表示已经成功发送邮箱验证邮件，需要查收。
         String veriCode=generateTool.generateVerificationCode();
         mailClient.sendMail(users.getEmail(), "Verify your email",veriCode);
-
         return veriCode;
 
     }
