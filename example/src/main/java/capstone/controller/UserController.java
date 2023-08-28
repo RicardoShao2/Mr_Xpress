@@ -4,8 +4,10 @@ import capstone.common.R;
 import capstone.entity.Users;
 import capstone.service.UserService;
 import capstone.utils.GenerateTool;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.DigestUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -27,9 +29,22 @@ public class UserController {
     * 登录方法
     *
     * */
-    @GetMapping("/login")
-    public R<Users> login(HttpServletRequest request, @RequestBody Users user){
-        return null;
+    @PostMapping ("/login")
+    public R<String> login(HttpServletRequest request, @RequestBody Users user){
+        LambdaQueryWrapper<Users> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Users::getEmail,user.getEmail());
+        Users userFind = userService.getOne(queryWrapper);
+
+        if(userFind==null)
+            return R.error("Wrong email");
+
+        String newPsw = DigestUtils.md5DigestAsHex(user.getPassword().getBytes());
+        if(!userFind.getPassword().equals(newPsw))
+            return R.error("Wrong password");
+
+        request.getSession().setAttribute("user",user.getId());
+        return R.success("login success");
+
     }
 
     /*
@@ -59,7 +74,7 @@ public class UserController {
     * */
     @PostMapping("/sign_up_2/{veriCode}")
     public R<String> sign_up_2(@RequestBody Users user,@PathVariable String veriCode,HttpServletRequest request){
-        long creationTime = (Long) request.getSession().getAttribute("codeCreationTime");
+        long creationTime = (Long) request.getSession().getAttribute("codeCreateTime");
         if(veriCode.equals(request.getSession().getAttribute("verifyCode")) && System.currentTimeMillis()- creationTime<GenerateTool.CODEVALIDTIME ) {
             userService.sign_up_2(user, veriCode);
             return R.success("sign up success");

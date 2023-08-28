@@ -11,4 +11,5 @@ public interface UserService extends IService<Users> {
     public String sign_up_1(Users users);
 
     public void sign_up_2(Users users, String veriCode);
+
 }

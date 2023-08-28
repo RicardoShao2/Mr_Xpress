@@ -47,6 +47,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, Users> implements U
         users.setStatus(1);
         String oldPsw = users.getPassword();
         String newPsw = DigestUtils.md5DigestAsHex(oldPsw.getBytes());
+        System.out.println(newPsw);
         users.setPassword(newPsw);
         this.save(users);
 
